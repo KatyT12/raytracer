@@ -18,7 +18,7 @@
 #include "Sphere.h"
 #include "Object.h"
 #include "Plane.h"
-
+#include "World.h"
 
 
 struct rgbType{
@@ -166,15 +166,12 @@ int main()
     int n  = width * height;
     rgbType* pixels = new rgbType[n];
 
-    Vector O {0,0,0};
-    Vector X(1,0,0);
-    Vector Y(0,1,0); 
-    Vector Z(0,0,1); 
+    World world;
      
     Vector CameraPosition(0,0,4);
 
     Camera scene_cam;
-    scene_cam.lookAt(CameraPosition,O,Y);
+    scene_cam.lookAt(CameraPosition,world.getO(),world.getY());
 
     Color whiteLight(1.0,1.0,1.0,1.0);
     Color cool_green(0.5,1.0,0.5,1.0);
@@ -185,12 +182,12 @@ int main()
     Light scene_light(lightPosition,whiteLight);
 
     //Scene objects
-    Sphere scene_Sphere(O,1,cool_green);//Sphere is at origin 
-    Plane scene_plane(Y,-1,maroon);//Directly beneath sphere
+    Sphere scene_Sphere(world.getO(),1,cool_green);//Sphere is at origin 
+    Plane scene_plane(world.getY(),-1,maroon);//Directly beneath sphere
 
-    std::vector<Object*> sceneObjects;
-    sceneObjects.push_back(dynamic_cast<Object*>(&scene_Sphere));
-    sceneObjects.push_back(dynamic_cast<Object*>(&scene_plane));
+    world.worldObjects.push_back(dynamic_cast<Object*>(&scene_Sphere));
+    world.worldObjects.push_back(dynamic_cast<Object*>(&scene_plane));
+
 
 
     double xamnt, yamnt;
@@ -234,23 +231,19 @@ int main()
             Ray cameraRay(cameraRayOrigin,cameraRayDirection);
 
             //Find intersections between camera ray and objects
-            std::vector<double> intersections;
-            for(int i = 0; i < sceneObjects.size(); i++)
-            {
-                intersections.push_back(sceneObjects[i]->findIntersection(cameraRay));
-            }
+            std::vector<double> intersections = world.findIntersections(cameraRay);
 
             int indexOfWinningObjects = winningObjectIndex(intersections);
 
 
             if(indexOfWinningObjects == -1) //No intersection
             {
-                pixels[thisone].r = 0;
-                pixels[thisone].g = 0;
-                pixels[thisone].b = 0;
+                pixels[thisone].r = world.getBackgroundColor().getColorRed();;
+                pixels[thisone].g = world.getBackgroundColor().getColorGreen();;
+                pixels[thisone].b = world.getBackgroundColor().getColorBlue();;
             }
             else{
-                Color color = sceneObjects[indexOfWinningObjects]->getColor();
+                Color color = world.worldObjects[indexOfWinningObjects]->getColor();
                 pixels[thisone].r = color.getColorRed();
                 pixels[thisone].g = color.getColorGreen();
                 pixels[thisone].b = color.getColorBlue();

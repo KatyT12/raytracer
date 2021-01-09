@@ -36,7 +36,6 @@ class Plane : public Object{
                 //You sure this is right
                 double b = normal.getDotProductWith(ray.getRayOrigin().vectorAdd(normal.scalarMult(distanceFromOrigin).getNegative()));
                 
-                std::cout << "Y:" << ray_direction.getVectorY() << " X: " << ray_direction.getVectorX() << " " << " " << -1*b/a << " ";
                 return -1 * b/a;
             }
 
