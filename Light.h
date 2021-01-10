@@ -2,8 +2,10 @@
 
 #include "Vector.h"
 #include "Color.h"
+#include "Source.h"
 
-class Light{
+
+class Light : public Source{
     Vector position;
     Color color;
 
@@ -12,9 +14,7 @@ class Light{
         Light(Vector,Color);
 
         Vector getLightPosition(){return position;}
-        Color getLightColor(){return color;}
-
-
+        Color getColor(){return color;}
 };
 
 

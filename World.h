@@ -4,6 +4,7 @@
 #include "Color.h"
 #include "Object.h"
 #include "Ray.h"
+#include "Source.h"
 #include <vector>
 
 class World{
@@ -16,6 +17,8 @@ class World{
         Color backgroundColor;
     public:
         std::vector<Object*>worldObjects;
+        std::vector<Source*>worldLights;
+
 
 
 

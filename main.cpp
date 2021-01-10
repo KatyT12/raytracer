@@ -19,7 +19,7 @@
 #include "Object.h"
 #include "Plane.h"
 #include "World.h"
-
+#include "Source.h"
 
 struct rgbType{
     double r;
@@ -149,6 +149,77 @@ int winningObjectIndex(std::vector<double> intersections)
 }
 
 
+Color getColorAt(Vector intersectionPos,Vector intersectionDir,std::vector<Object*> worldObjects,int indexOfWinningObjects,std::vector<Source*>worldLights,double accuracy,double ambientLight)
+{
+    Color final_color = worldObjects[indexOfWinningObjects]->getColor().scale(ambientLight); //If in shadow then it will just have the ambient
+    
+       
+    
+    Vector intersectionNormal = worldObjects[indexOfWinningObjects]->getNormalAt(intersectionPos);
+
+    Color winningObjCol = worldObjects[indexOfWinningObjects]->getColor();
+
+        
+
+    for(int l_index = 0; l_index < worldLights.size();l_index++)
+    {
+        
+        Vector lightdir = worldLights[l_index]->getLightPosition().vectorAdd(intersectionPos.getNegative()).getNormalized(); //Vector from intersection to light
+
+        float dotProduct = intersectionNormal.getDotProductWith(lightdir);
+        
+        
+
+        if(dotProduct > 0) //90 degrees or less different from the normal
+        { 
+
+            bool inShadow = false; //Not in shadow by default
+            float distanceToLight = worldLights[l_index]->getLightPosition().vectorAdd(intersectionPos.getNegative()).getMagnitude();
+
+            Ray shadowRay(intersectionPos,(worldLights[l_index]->getLightPosition().vectorAdd(intersectionPos.getNegative())).getNormalized()); 
+
+            std::vector<double> shadowIntersections;
+            /*If there is an intersection between the first intersection and the light source the the first intersection is in shadow*/
+            for(int obj_index = 0; obj_index < worldObjects.size() && inShadow == false; obj_index++)
+            {
+                if(obj_index != indexOfWinningObjects)
+                {
+                    shadowIntersections.push_back(worldObjects[obj_index]->findIntersection(shadowRay)); 
+                }
+            }
+            for(int s_i_index = 0; s_i_index < shadowIntersections.size();s_i_index++)
+            {
+                if(shadowIntersections[s_i_index] > accuracy)
+                {
+                    if(shadowIntersections[s_i_index] <= distanceToLight)
+                    {
+                        inShadow = true;
+                    }
+                }
+            }
+   
+            if(inShadow == false)
+            {
+             
+                final_color = final_color.addColor(winningObjCol.multiplyColor(worldLights[l_index]->getColor().scale(dotProduct))); //diffuse color
+                final_color.Clamp();
+                //final_color.Clamp();             
+              
+                //if(worldObjects[indexOfWinningObjects]->getColor().getColorSpecial() > 0 && worldObjects[indexOfWinningObjects]->getColor().getColorSpecial() < 1)
+                //{
+                //    double dot1 = intersectionNormal.getDotProductWith(intersectionDir.getNegative());
+                //    Vector scalar = intersectionNormal.scalarMult(dot1);
+                //    Vector
+                //}
+            }            
+        }
+    
+    }
+    return final_color;
+
+}
+
+
 int thisone;
 
 
@@ -162,6 +233,8 @@ int main()
     int height = 480;
     double aspectRatio = (double)width / (double) height;
 
+    double ambientLight = 0.2;
+    double accuracy = 0.000001;
 
     int n  = width * height;
     rgbType* pixels = new rgbType[n];
@@ -180,7 +253,7 @@ int main()
 
     Vector lightPosition(-7,10,10);
     Light scene_light(lightPosition,whiteLight);
-
+    world.worldLights.push_back(dynamic_cast<Source*>(&scene_light));
     //Scene objects
     Sphere scene_Sphere(world.getO(),1,cool_green);//Sphere is at origin 
     Plane scene_plane(world.getY(),-1,maroon);//Directly beneath sphere
@@ -192,16 +265,12 @@ int main()
 
     double xamnt, yamnt;
 
-
     for(int x =0; x < width; x++)
     {
         for(int y = 0; y < height;y++)
         {
 
             thisone = y*width + x;
-
-
-            /* I feel like xamnt and yamnt are like where on the view plane or whatever*/
 
             //Start  with no anti-aliasing
             if(width > height)
@@ -225,12 +294,13 @@ int main()
             }
          
             Vector cameraRayOrigin = scene_cam.getCameraPosition();
-            //I am pretty sure here we are saying  the direction of the camera ray going through the viewplane. That is why we minus 0.5 to each because the camera is in the middle not the top right
+            /*Direction of camera rays throught the view plane*/
             Vector cameraRayDirection = scene_cam.getCameraDirection().vectorAdd(scene_cam.getCameraRight().scalarMult(xamnt - 0.5).vectorAdd(scene_cam.getCameraDown().scalarMult(yamnt - 0.5))).getNormalized();
+
+
 
             Ray cameraRay(cameraRayOrigin,cameraRayDirection);
 
-            //Find intersections between camera ray and objects
             std::vector<double> intersections = world.findIntersections(cameraRay);
 
             int indexOfWinningObjects = winningObjectIndex(intersections);
@@ -238,21 +308,35 @@ int main()
 
             if(indexOfWinningObjects == -1) //No intersection
             {
-                pixels[thisone].r = world.getBackgroundColor().getColorRed();;
-                pixels[thisone].g = world.getBackgroundColor().getColorGreen();;
-                pixels[thisone].b = world.getBackgroundColor().getColorBlue();;
+                Color bg_col = world.getBackgroundColor();
+                pixels[thisone].r = bg_col.getColorRed();
+                pixels[thisone].g = bg_col.getColorGreen();
+                pixels[thisone].b = bg_col.getColorBlue();
             }
             else{
-                Color color = world.worldObjects[indexOfWinningObjects]->getColor();
-                pixels[thisone].r = color.getColorRed();
-                pixels[thisone].g = color.getColorGreen();
-                pixels[thisone].b = color.getColorBlue();
+                double this_intersection = intersections[indexOfWinningObjects];
+                if(this_intersection > accuracy){ //If intersecion is greater than accuracy
+                    Vector intersectionPos  = cameraRayOrigin.vectorAdd(cameraRayDirection.scalarMult(this_intersection)); 
+                    Vector intersectionDir = cameraRayDirection;
+
+                    Color intersectionCol = getColorAt(intersectionPos,intersectionDir,world.worldObjects,indexOfWinningObjects,world.worldLights,accuracy,ambientLight);
+
+
+                    pixels[thisone].r = intersectionCol.getColorRed();
+                    pixels[thisone].g = intersectionCol.getColorGreen();
+                    pixels[thisone].b = intersectionCol.getColorBlue();
+                } 
+                
+                
+                
+                
 
             }
         }
     }
+         savebmp("test.bmp",width,height,dpi,pixels);    
+     
     
-    savebmp("test.bmp",width,height,dpi,pixels);    
     
     return 0;
 }

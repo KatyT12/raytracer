@@ -15,6 +15,8 @@ class Object{
             return 0;
         }
 
+        virtual Vector getNormalAt(Vector point){return Vector(0,1,0);}
+
 };
 
 Object::Object(){}

@@ -16,13 +16,13 @@ class Plane : public Object{
 
         Vector getPlaneNormal(){return normal;}
         double getPlaneDistance(){return distanceFromOrigin;}
-        virtual Color getColor(){return color;}
+        Color getColor(){return color;}
 
         Vector getNormalAt(Vector point){
             return normal;
         }
 
-        virtual double findIntersection(Ray ray){
+        double findIntersection(Ray ray){
             Vector ray_direction = ray.getRayDirection();
             double a = ray_direction.getDotProductWith(normal);
 

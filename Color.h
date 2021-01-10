@@ -34,12 +34,22 @@ class Color{
         }
         Color multiplyColor(Color color)
         {
-            return Color(red*color.getColorRed(),green + color.getColorGreen(), blue * color.getColorBlue(),special);
+            return Color(red*color.getColorRed(),green * color.getColorGreen(), blue * color.getColorBlue(),special);
         }
 
         Color colorAverage(Color color)
         {
             return Color((red*color.getColorRed())/2,(green + color.getColorGreen()/2), (blue * color.getColorBlue()/2),special);
+        }
+
+        void Clamp(double min = 0.0, double max = 1.0){
+            if(red < min) red = min;
+            if(green < min) green = min;
+            if(blue < min) blue = min;
+
+            if(red > max) red = max;
+            if(green > max) green = max;
+            if(blue > max) blue = max;
         }
 
 };

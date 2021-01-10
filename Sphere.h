@@ -16,7 +16,7 @@ class Sphere : public Object{
 
         Vector getSphereCentre(){return centre;}
         double getSphereRadius(){return radius;}
-        virtual Color getColor(){return color;}
+        Color getColor(){return color;}
 
         Vector getNormalAt(Vector point)
         {
