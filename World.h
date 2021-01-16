@@ -16,13 +16,12 @@ class World{
         Vector Z;
 
         Color backgroundColor;
+        double ambientLight;
+
     public:
         std::vector<Object*>worldObjects;
         std::vector<Source*>worldLights;
-        Camera cam;
-
-
-
+        Camera *cam;
 
         World()
         :O(Vector(0,0,0)), X(Vector(1,0,0)), Y(Vector(0,1,0)), Z(Vector(0,0,1)), backgroundColor(Color(0,0,0,0))
@@ -61,5 +60,14 @@ class World{
             return backgroundColor;
         }
 
+        double getAmbientLight()
+        {
+            return ambientLight;
+        }
+
+        void setAmbientLight(double newAmbient)
+        {
+            ambientLight = newAmbient;
+        }
 
 };
