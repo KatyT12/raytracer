@@ -152,27 +152,21 @@ int winningObjectIndex(std::vector<double> intersections)
 Color getColorAt(Vector intersectionPos,Vector intersectionDir,std::vector<Object*> worldObjects,int indexOfWinningObjects,std::vector<Source*>worldLights,double accuracy,double ambientLight)
 {
     Color final_color = worldObjects[indexOfWinningObjects]->getColor().scale(ambientLight); //If in shadow then it will just have the ambient
-    
-       
-    
     Vector intersectionNormal = worldObjects[indexOfWinningObjects]->getNormalAt(intersectionPos);
 
     Color winningObjCol = worldObjects[indexOfWinningObjects]->getColor();
 
         
-
+    //For every light get the color it gives the winning object
     for(int l_index = 0; l_index < worldLights.size();l_index++)
     {
         
         Vector lightdir = worldLights[l_index]->getLightPosition().vectorAdd(intersectionPos.getNegative()).getNormalized(); //Vector from intersection to light
-
         float dotProduct = intersectionNormal.getDotProductWith(lightdir);
-        
-        
 
-        if(dotProduct > 0) //90 degrees or less different from the normal
+        //90 degrees or less different from the normal
+        if(dotProduct > 0) 
         { 
-
             bool inShadow = false; //Not in shadow by default
             float distanceToLight = worldLights[l_index]->getLightPosition().vectorAdd(intersectionPos.getNegative()).getMagnitude();
 
@@ -200,17 +194,42 @@ Color getColorAt(Vector intersectionPos,Vector intersectionDir,std::vector<Objec
    
             if(inShadow == false)
             {
-             
                 final_color = final_color.addColor(winningObjCol.multiplyColor(worldLights[l_index]->getColor().scale(dotProduct))); //diffuse color
+
+                if(winningObjCol.getColorSpecial() > 0 && winningObjCol.getColorSpecial() <=1)
+                {
+
+                    /* A poor attemp at using the blinn phong model, no matter what power I gave it the specular reflection would just look like a white dot
+                    Vector halfwayVector = (intersectionDir.getNegative().vectorAdd((worldLights[l_index]->getLightPosition().vectorAdd(intersectionPos.getNegative())).getNormalized())).getNormalized();
+                    float dot = intersectionNormal.getDotProductWith(halfwayVector);
+                    if(dot > 0)
+                    {
+                        final_color = final_color.addColor(winningObjCol.multiplyColor(worldLights[l_index]->getColor().scale(pow(dot,100))));
+                    }
+                    */
+
+                   //Get reflection of view direction from normal
+                   Vector reflection = intersectionDir.getRelectionWith(intersectionNormal);
+
+                   //specular
+                   double spec = reflection.getDotProductWith(lightdir);
+                   if(spec >0)
+                   {
+                       spec = pow(spec,10);
+                       final_color = final_color.addColor(worldLights[l_index]->getColor().scale(spec * winningObjCol.getColorSpecial()));
+                   }
+
+                   
+
+
+                }
+
                 final_color.Clamp();
-                //final_color.Clamp();             
-              
-                //if(worldObjects[indexOfWinningObjects]->getColor().getColorSpecial() > 0 && worldObjects[indexOfWinningObjects]->getColor().getColorSpecial() < 1)
-                //{
-                //    double dot1 = intersectionNormal.getDotProductWith(intersectionDir.getNegative());
-                //    Vector scalar = intersectionNormal.scalarMult(dot1);
-                //    Vector
-                //}
+
+                        //std::cout << winningObjCol.getColorRed() << "\n";
+                
+
+                
             }            
         }
     
@@ -241,17 +260,20 @@ int main()
 
     World world;
      
-    Vector CameraPosition(0,0,4);
+    Vector CameraPosition(3,1.5,-4);
 
     Camera scene_cam;
     scene_cam.lookAt(CameraPosition,world.getO(),world.getY());
+    world.cam = scene_cam;
 
     Color whiteLight(1.0,1.0,1.0,1.0);
-    Color cool_green(0.5,1.0,0.5,1.0);
+    Color cool_green(0.5,1.0,0.5,0.3);
     Color gray(0.5,0.5,0.5,0.0);
     Color maroon(0.5,0.25,0.25,0);
 
-    Vector lightPosition(-7,10,10);
+    Vector lightPosition(-7,10,-10);
+
+    //Vector lightPosition(-4,7,10);
     Light scene_light(lightPosition,whiteLight);
     world.worldLights.push_back(dynamic_cast<Source*>(&scene_light));
     //Scene objects

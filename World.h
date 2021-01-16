@@ -6,6 +6,7 @@
 #include "Ray.h"
 #include "Source.h"
 #include <vector>
+#include "Camera.h"
 
 class World{
     private:
@@ -18,6 +19,7 @@ class World{
     public:
         std::vector<Object*>worldObjects;
         std::vector<Source*>worldLights;
+        Camera cam;
 
 
 

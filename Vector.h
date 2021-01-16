@@ -16,6 +16,11 @@ class Vector{
             return sqrt((x*x) + (y*y) + (z*z));
         }
 
+        Vector getSelf()
+        {
+            return Vector(x,y,z);
+        }
+
         Vector getNormalized()
         {
             double magnitude = sqrt((x*x) + (y*y) + (z*z));
@@ -45,6 +50,18 @@ class Vector{
         Vector scalarMult(double s)
         {
             return Vector(x * s, y * s, z * s);
+        }
+
+        //This function expects a normal that is normalised 
+        Vector getRelectionWith(Vector normal)
+        {
+            double dotProduct = normal.getDotProductWith(getNegative()); 
+            Vector projectedOntoNormal = normal.scalarMult(dotProduct);  //Projection of view direction on normal
+            Vector halfwayVector = projectedOntoNormal.vectorAdd(getSelf());  //adding the intersection dir is the same as minusing the negative dir (going from the intersectionpos) 
+            Vector doubleHalfwayVector = halfwayVector.scalarMult(2); //Need to double the vector because otherwise minusing it would just get the projected N
+            Vector unNormalisedReflection = doubleHalfwayVector.vectorAdd(getSelf().getNegative()); 
+            Vector reflection = unNormalisedReflection.getNormalized();
+            return reflection;
         }
 };
 
