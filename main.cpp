@@ -1,15 +1,3 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <cmath>
-#include <limits>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-
 #include "Vector.h"
 #include "Ray.h"
 #include "Camera.h"
