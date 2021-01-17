@@ -43,14 +43,15 @@ int main()
 
     //Vector lightPosition(-4,7,10);
     Light scene_light(lightPosition,whiteLight);
-    world.worldLights.push_back(dynamic_cast<Source*>(&scene_light));
     //Scene objects
     Sphere scene_Sphere(world.getO(),1,cool_green);//Sphere is at origin 
     Plane scene_plane(world.getY(),-1,maroon);//Directly beneath sphere
 
-    world.worldObjects.push_back(dynamic_cast<Object*>(&scene_Sphere));
-    world.worldObjects.push_back(dynamic_cast<Object*>(&scene_plane));
-    
+    world.add(scene_light);
+    world.add(scene_Sphere);
+    world.add(scene_plane);
+
+
     Renderer renderer(world,width,height);
  
     savebmp("test.bmp",width,height,dpi,renderer.render());    

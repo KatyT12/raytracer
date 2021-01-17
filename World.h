@@ -70,4 +70,16 @@ class World{
             ambientLight = newAmbient;
         }
 
+        template <typename T>
+        void add(T& obj)
+        {
+            if(std::is_same<T,Light>())
+            {
+                worldLights.push_back(dynamic_cast<Light*>(&obj));
+            }
+            else{
+                worldObjects.push_back(dynamic_cast<Object*>(&obj));
+            }
+        }
+
 };
