@@ -37,7 +37,7 @@ int main()
     Color whiteLight(1.0,1.0,1.0,1.0);
     Color cool_green(0.5,1.0,0.5,0.3);
     Color gray(0.5,0.5,0.5,0.0);
-    Color maroon(0.5,0.25,0.25,0);
+    Color maroon(0.5,0.8,0.8,2);
 
     Vector lightPosition(-7,10,-10);
 

@@ -63,6 +63,7 @@ class Renderer
             for(int y = 0; y < height;y++)
             {
 
+                
                 int thisone = y*width + x;
 
 
@@ -78,9 +79,7 @@ class Renderer
                 Vector cameraRayDirection = scene_cam.getCameraDirection().vectorAdd(scene_cam.getCameraRight().scalarMult(xamnt - 0.5).vectorAdd(scene_cam.getCameraDown().scalarMult(yamnt - 0.5))).getNormalized();
 
 
-
                 Ray cameraRay(cameraRayOrigin,cameraRayDirection);
-
                 std::vector<double> intersections = world.findIntersections(cameraRay);
 
                 int indexOfWinningObjects = winningObjectIndex(intersections);
@@ -127,12 +126,19 @@ class Renderer
 
  Color Renderer::getColorAt(Vector intersectionPos,Vector intersectionDir,std::vector<Object*> worldObjects,int indexOfWinningObjects,std::vector<Source*>worldLights,double accuracy,double ambientLight)
     {
-    Color final_color = worldObjects[indexOfWinningObjects]->getColor().scale(ambientLight); //If in shadow then it will just have the ambient
     Vector intersectionNormal = worldObjects[indexOfWinningObjects]->getNormalAt(intersectionPos);
 
     Color winningObjCol = worldObjects[indexOfWinningObjects]->getColor();
 
         
+    if(winningObjCol.getColorSpecial() == 2)
+    {
+        winningObjCol.tiling(intersectionPos);
+    }
+    
+    Color final_color = winningObjCol.scale(ambientLight); //If in shadow then it will just have the ambient
+
+
     //For every light get the color it gives the winning object
     for(int l_index = 0; l_index < worldLights.size();l_index++)
     {

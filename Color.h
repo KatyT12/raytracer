@@ -52,6 +52,24 @@ class Color{
             if(blue > max) blue = max;
         }
 
+
+
+        void tiling(Vector position)
+        {
+            int square = floor(position.getVectorX()) + floor(position.getVectorZ());
+            if(square % 2 ==0)
+            {
+                setColorRed(0);
+                setColorGreen(0);
+                setColorBlue(0);
+            }
+            else{
+                setColorRed(1);
+                setColorGreen(1);
+                setColorBlue(1);
+            }
+        }
+
 };
 
 
